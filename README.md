@@ -17,6 +17,8 @@ and **Turso / libSQL**. Deploys to **Vercel**.
 - **File upload**: turn a `.txt` or `.md` file into a new editable document.
 - **Sharing**: an owner can grant other users access; shared docs show up under
   "Shared with me".
+- **Export**: download any document as **Markdown (.md)** or **PDF**, fully in
+  the browser (see below).
 - **Mocked auth**: a seeded set of users and a user-switcher dropdown (no real
   login / passwords).
 - **Persistence**: documents and shares survive refresh; formatting is preserved
@@ -40,6 +42,27 @@ intentionally skipped — see [ARCHITECTURE.md](ARCHITECTURE.md).
 Max upload size: **1 MB**.
 
 ---
+
+## Exporting documents
+
+Open any document and use the **⬇ Export** menu in the top-right of the editor:
+
+- **Export as Markdown (.md)** — converts the document to Markdown (via
+  `turndown`) and downloads a `.md` file.
+- **Export as PDF** — renders the document to an A4 PDF (via `html2canvas` +
+  `jsPDF`) and downloads it.
+
+Both run **entirely in the browser** — no server routes or external services,
+so it works on Vercel with nothing paid.
+
+**Formatting & limitations:**
+- Headings, **bold**, *italic*, and bulleted/numbered lists are preserved in
+  both exports.
+- **Markdown** has no underline syntax, so underlined text is exported as plain
+  text.
+- The **PDF** is a faithful visual render of the document, but the text is
+  image-based (not selectable/searchable), and very long documents are sliced
+  across pages by height (a line may occasionally land on a page boundary).
 
 ## Seeded users (mocked auth)
 

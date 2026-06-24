@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Editor from "@/components/Editor";
 import ShareDialog from "@/components/ShareDialog";
+import ExportMenu from "@/components/ExportMenu";
 import { useUser } from "@/components/UserProvider";
 import { apiFetch } from "@/lib/apiClient";
 
@@ -128,6 +129,10 @@ export default function DocumentPage() {
               Shared with you
             </span>
           )}
+          <ExportMenu
+            getHtml={() => contentRef.current}
+            getTitle={() => titleRef.current}
+          />
           {accessLevel === "owner" && (
             <button
               onClick={() => setShowShare(true)}
