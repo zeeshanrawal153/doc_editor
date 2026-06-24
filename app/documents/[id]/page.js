@@ -19,15 +19,13 @@ export default function DocumentPage() {
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-  const [saveStatus, setSaveStatus] = useState("saved"); // saved | saving | unsaved | error
+  const [saveStatus, setSaveStatus] = useState("saved");
   const [showShare, setShowShare] = useState(false);
 
-  // Latest content/title kept in refs so the debounced saver reads fresh values.
   const contentRef = useRef("");
   const titleRef = useRef("");
   const timerRef = useRef(null);
 
-  // Load the document (re-runs if the active user changes).
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -63,7 +61,7 @@ export default function DocumentPage() {
         }),
       });
       setSaveStatus("saved");
-    } catch (err) {
+    } catch {
       setSaveStatus("error");
     }
   }, [id]);
@@ -74,7 +72,6 @@ export default function DocumentPage() {
     timerRef.current = setTimeout(save, AUTOSAVE_DELAY);
   }, [save]);
 
-  // Flush a pending save on unmount.
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -99,33 +96,42 @@ export default function DocumentPage() {
   }
 
   if (userLoading || loading) {
-    return <main className="mx-auto max-w-4xl p-6 text-gray-500">Loading…</main>;
+    return <main className="mx-auto max-w-4xl px-6 py-10 text-slate-400">Loading…</main>;
   }
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-4xl p-6">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">
+      <main className="mx-auto max-w-4xl px-6 py-10">
+        <Link href="/" className="text-sm font-medium text-indigo-600 hover:underline">
           ← Back to dashboard
         </Link>
-        <p className="mt-4 rounded bg-red-100 px-3 py-2 text-sm text-red-800">
-          {loadError}
-        </p>
+        <div className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-5 py-8 text-center">
+          <p className="text-2xl">🔒</p>
+          <p className="mt-2 text-sm font-medium text-rose-700">{loadError}</p>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <Link href="/" className="text-sm text-blue-600 hover:underline">
-          ← Back to dashboard
+    <main className="mx-auto max-w-4xl px-6 py-6">
+      <div className="mb-5 flex items-center justify-between">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-900"
+        >
+          ← Back
         </Link>
         <div className="flex items-center gap-3">
+          {accessLevel === "shared" && (
+            <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">
+              Shared with you
+            </span>
+          )}
           {accessLevel === "owner" && (
             <button
               onClick={() => setShowShare(true)}
-              className="rounded border border-gray-300 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               🔗 Share
             </button>
@@ -142,20 +148,13 @@ export default function DocumentPage() {
         />
       )}
 
-      <div className="mb-2 flex items-center gap-2">
-        <input
-          value={title}
-          onChange={handleTitleChange}
-          maxLength={200}
-          className="w-full rounded border border-transparent px-2 py-1 text-2xl font-bold hover:border-gray-200 focus:border-blue-500 focus:outline-none"
-          placeholder="Untitled document"
-        />
-        {accessLevel === "shared" && (
-          <span className="shrink-0 rounded bg-purple-100 px-2 py-1 text-xs text-purple-800">
-            Shared with you
-          </span>
-        )}
-      </div>
+      <input
+        value={title}
+        onChange={handleTitleChange}
+        maxLength={200}
+        className="mb-4 w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-3xl font-bold tracking-tight text-slate-900 transition placeholder:text-slate-300 hover:border-slate-200 focus:border-indigo-400 focus:bg-white focus:outline-none"
+        placeholder="Untitled document"
+      />
 
       <Editor initialContent={doc.content} onChange={handleContentChange} />
     </main>
@@ -164,18 +163,21 @@ export default function DocumentPage() {
 
 function SaveBadge({ status, onSave }) {
   const map = {
-    saved: { text: "All changes saved", cls: "text-green-700" },
-    saving: { text: "Saving…", cls: "text-gray-500" },
-    unsaved: { text: "Unsaved changes", cls: "text-amber-600" },
-    error: { text: "Save failed — retry", cls: "text-red-600" },
+    saved: { text: "Saved", dot: "bg-emerald-500", cls: "text-emerald-700" },
+    saving: { text: "Saving…", dot: "bg-amber-400", cls: "text-amber-600" },
+    unsaved: { text: "Unsaved", dot: "bg-amber-400", cls: "text-amber-600" },
+    error: { text: "Save failed", dot: "bg-rose-500", cls: "text-rose-600" },
   };
   const s = map[status] || map.saved;
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span className={s.cls}>{s.text}</span>
+    <div className="flex items-center gap-2">
+      <span className={`flex items-center gap-1.5 text-xs font-medium ${s.cls}`}>
+        <span className={`h-2 w-2 rounded-full ${s.dot}`} />
+        {s.text}
+      </span>
       <button
         onClick={onSave}
-        className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-100"
+        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
       >
         Save
       </button>

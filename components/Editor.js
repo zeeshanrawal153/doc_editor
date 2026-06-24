@@ -10,31 +10,30 @@ import Underline from "@tiptap/extension-underline";
 export default function Editor({ initialContent, editable = true, onChange }) {
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-      }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Underline,
     ],
     content: initialContent || "",
     editable,
-    // Required in Next.js App Router to avoid SSR hydration mismatches.
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "rich-text px-4 py-3 min-h-[60vh] focus:outline-none",
+        class: "rich-text px-6 py-5 min-h-[60vh] focus:outline-none",
       },
     },
-    onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
-    },
+    onUpdate: ({ editor }) => onChange?.(editor.getHTML()),
   });
 
   if (!editor) {
-    return <div className="px-4 py-3 text-gray-400">Loading editor…</div>;
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 text-slate-400">
+        Loading editor…
+      </div>
+    );
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       {editable && <Toolbar editor={editor} />}
       <EditorContent editor={editor} />
     </div>
@@ -43,12 +42,12 @@ export default function Editor({ initialContent, editable = true, onChange }) {
 
 function Toolbar({ editor }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-gray-200 p-2">
+    <div className="sticky top-[57px] z-30 flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50/80 px-3 py-2 backdrop-blur">
       <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} label="Bold">
         <span className="font-bold">B</span>
       </Btn>
       <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} label="Italic">
-        <span className="italic">I</span>
+        <span className="italic font-serif">I</span>
       </Btn>
       <Btn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive("underline")} label="Underline">
         <span className="underline">U</span>
@@ -89,8 +88,10 @@ function Btn({ onClick, active, label, children }) {
       title={label}
       aria-label={label}
       aria-pressed={active}
-      className={`min-w-[2rem] rounded px-2 py-1 text-sm ${
-        active ? "bg-blue-600 text-white" : "text-gray-700 hover:bg-gray-100"
+      className={`min-w-[2.1rem] rounded-md px-2 py-1 text-sm transition ${
+        active
+          ? "bg-indigo-600 text-white shadow-sm"
+          : "text-slate-600 hover:bg-slate-200"
       }`}
     >
       {children}
@@ -99,5 +100,5 @@ function Btn({ onClick, active, label, children }) {
 }
 
 function Divider() {
-  return <span className="mx-1 h-5 w-px bg-gray-200" />;
+  return <span className="mx-1 h-5 w-px bg-slate-300" />;
 }
